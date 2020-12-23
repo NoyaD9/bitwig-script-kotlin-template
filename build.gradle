@@ -1,0 +1,36 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.4.10'
+    id 'java'
+}
+group = 'it.noya'
+version = '0.1'
+
+repositories {
+    mavenCentral()
+    maven {
+        url "https://maven.bitwig.com"
+    }
+}
+dependencies {
+    implementation 'com.bitwig:extension-api:12'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
+}
+compileKotlin {
+    kotlinOptions.jvmTarget = '1.8'
+}
+
+jar {
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+task install(type: Copy) {
+    Properties properties = new Properties()
+    properties.load(project.file('local.properties').newDataInputStream())
+    def extensionDir = properties.getProperty('extension.dir', 'build/libs')
+    from jar
+    into extensionDir
+    rename {"${project.name}.bwextension"}
+}
